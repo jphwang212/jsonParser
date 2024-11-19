@@ -2,10 +2,14 @@
 #include<fstream>
 #include<locale>
 #include<string>
+#include<filesystem>
 using namespace std;
 
 // has matching sets of "{}"
 static int isJSON(string file) {
+    if (std::filesystem::is_empty(file)) {
+        return 1;
+    }
     int isJson = 0;
     std::locale::global(std::locale(""));
     std::wifstream readFile(file);
@@ -22,9 +26,6 @@ static int isJSON(string file) {
             }
         }
         readFile.close();
-    }
-    if (&readFile.peek() == std::ifstream::traits_type::eof) {
-        return 1;
     }
     return 0;
 }

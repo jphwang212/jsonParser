@@ -23,7 +23,7 @@ static int isJSON(string file) {
         }
         readFile.close();
     }
-    if (*readFile.peek() == std::ifstream::traits_type::eof) {
+    if (&readFile.peek() == std::ifstream::traits_type::eof) {
         return 1;
     }
     return 0;
