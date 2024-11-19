@@ -21,8 +21,9 @@ static int isJSON(string file) {
                 return 1;
             }
         }
+        readFile.close();
     }
-    if ((readFile.rdstate() & ifstream::failbit) != 0) {
+    if (&readFile.peek() == std::ifstream::traits_type::eof) {
         return 1;
     }
     return 0;
