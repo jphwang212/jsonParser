@@ -2,10 +2,37 @@
 #include<fstream>
 #include<locale>
 #include<string>
+#include<unordered_map>
+#include<filesystem>
+#include<iomanip>
 using namespace std;
 
+
+
+static void parseFile(string file) {
+    std::unordered_map<string, string> stringMap;
+    wstring key, value, colon, comma;
+    std::locale::global(std::locale(""));
+    std::wifstream readFile(file);
+    wchar_t ch;
+    if (readFile.is_open()) {
+        while (readFile.get(ch)) {
+            if (ch == '{') {
+                while (readFile >> std::quoted(key) >> colon >> std::quoted(value) >> comma) {
+                    stringMap.insert(std::make_pair(key, value));
+                }    
+            } else if (ch == '}') {
+                break;
+            }
+        }
+    }
+}
 // has matching sets of "{}"
 static int isJSON(string file) {
+    if (std::filesystem::is_empty(file)) {
+        cout << "[Invalid JSON]: " << file << " is empty\n";
+        return 1;
+    }
     int isJson = 0;
     std::locale::global(std::locale(""));
     std::wifstream readFile(file);
@@ -18,14 +45,12 @@ static int isJSON(string file) {
                 isJson--;
             }
             if (isJson < 0) {
+                cout << "[Invalid JSON]: " << file << " is formatted incorrectly\n";
                 return 1;
             }
         }
-        readFile.close();
     }
-    if (&readFile.peek() == std::ifstream::traits_type::eof) {
-        return 1;
-    }
+    cout << "[Valid JSON]: " << file << "\n";
     return 0;
 }
 int main() {
