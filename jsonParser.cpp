@@ -10,17 +10,6 @@ using namespace std;
 
 class jsonParser {
     public:
-        // static void parseJson(wifstream& stream, unordered_map<wstring, wstring>& map) {
-        //     //char key[256], value[256], colon[1], comma[1];
-        //     wstring key, value, colon, comma, line;
-        //     if (stream.is_open()) {
-        //         while (std::getline(stream, line)) {
-        //             wistringstream iss(line);
-        //             iss >> std::quoted(key) >> colon >> std::quoted(value) >> comma;
-        //             map.insert({key, value});
-        //         }
-        //     }
-        // }
         static void parseFile(string file) {
             if (jsonParser::isJSON(file) == 0) {
                 typedef std::istreambuf_iterator<char> buf_iter;
