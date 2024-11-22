@@ -10,34 +10,43 @@ using namespace std;
 
 class jsonParser {
     public:
-        static void parseJson(wifstream& stream, unordered_map<wstring, wstring>& map) {
-            //char key[256], value[256], colon[1], comma[1];
-            wstring key, value, colon, comma, line;
-            if (stream.is_open()) {
-                while (std::getline(stream, line)) {
-                    wistringstream iss(line);
-                    iss >> std::quoted(key) >> colon >> std::quoted(value) >> comma;
-                    map.insert({key, value});
-                }
-            }
-        }
+        // static void parseJson(wifstream& stream, unordered_map<wstring, wstring>& map) {
+        //     //char key[256], value[256], colon[1], comma[1];
+        //     wstring key, value, colon, comma, line;
+        //     if (stream.is_open()) {
+        //         while (std::getline(stream, line)) {
+        //             wistringstream iss(line);
+        //             iss >> std::quoted(key) >> colon >> std::quoted(value) >> comma;
+        //             map.insert({key, value});
+        //         }
+        //     }
+        // }
         static void parseFile(string file) {
             if (jsonParser::isJSON(file) == 0) {
-                std::unordered_map<wstring, wstring> stringMap;
+                typedef std::istreambuf_iterator<char> buf_iter;
+                std::unordered_map<string, string> stringMap;
                 std::locale::global(std::locale(""));
-                std::wifstream readFile(file);
-                wchar_t ch;
-                if (readFile.is_open()) {
-                    wstring key, value, colon, comma;
-                    while (readFile.get(ch)) {
-                        if (ch == '{') {
-                            parseJson(readFile, stringMap);
-                        } else if (ch == '}') {
-                            break;
-                        }
+                std::ifstream readFile(file);
+                std::stringstream ss;
+                string key, value, colon;
+
+                for (buf_iter i(readFile), e; i!= e; i++) {
+                    char c = *i;
+                    if (c == '{') {
+                        continue;
+                    } else if (c == '}') {
+                        break;
+                    } else if (c == ',') {
+                        ss >> std::quoted(key) >> colon >> std::quoted(value);
+                        stringMap.insert({key, value});
+                        ss.str("");
+                    } else {
+                        ss << c;
                     }
                 }
-
+                for (const auto& pair : stringMap) {
+                    cout << pair.first << ": " << pair.second << endl;
+                }
             }
         }
         // has matching sets of "{}"
@@ -72,5 +81,6 @@ int main() {
     int invalidIsJson = jsonParser::isJSON("tests/step1/invalid.json");
     cout << "Running tests ******\n[Step 1 Valid]\tShould = 0: " << validIsJson << "]\n";
     cout << "[Step 1 Invalid]\tShould = 1: " << invalidIsJson << "]\n";
+    jsonParser::parseFile("tests/step2/valid2.json");
     return 0;
 }
