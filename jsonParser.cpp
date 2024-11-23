@@ -3,6 +3,7 @@
 #include<locale>
 #include<string>
 #include<unordered_map>
+#include<vector>
 #include<filesystem>
 #include<sstream>
 #include<iomanip>
@@ -16,8 +17,10 @@ class jsonParser {
                 std::unordered_map<string, string> stringMap;
                 std::locale::global(std::locale(""));
                 std::ifstream readFile(file);
-                std::stringstream ss;
+                std::stringstream ss, val;
                 string key, value, colon;
+                bool boolVal;
+                int intVal;
 
                 for (buf_iter i(readFile), e; i!= e; i++) {
                     char c = *i;
@@ -27,7 +30,40 @@ class jsonParser {
                         break;
                     } else if (c == ',') {
                         ss >> std::quoted(key) >> colon >> std::quoted(value);
+                        // have to simulate different types. c++ maps limited to values of 1 type
+                        // prints value and type
+                        if (ss.fail()) {
+                            // try bool and convert to string for map
+                            ss >> boolVal;
+                            value = boolVal ? "true" : "false";
+                        } else if (ss.fail()) {
+                            // try int and convert to string for map
+                            ss >> intVal;
+                            value = std::to_string(intVal);
+                        } else if (ss.fail() & (ss.peek() == '[')) {
+                            // check if array type
+                            value = "[Array type]: ";
+                            char elem;
+                            while (ss >> elem) {
+                                if (elem == ',') {
+                                    break;
+                                }
+                                value += elem;
+                            }
+                        } else if (ss.fail() & (ss.peek() == '{')) {
+                            value = "[Object type]: ";
+                            char elem;
+                            while (ss >> elem) {
+                                value += elem;
+                                if (elem == '}') {
+                                    break;
+                                }
+
+                            }
+                        }
                         stringMap.insert({key, value});
+                        key = "";
+                        value = "";
                         ss.str("");
                     } else {
                         ss << c;
