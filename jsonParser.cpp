@@ -18,6 +18,12 @@ public:
             std::locale::global(std::locale(""));
             std::ifstream readFile(file);
             string key, value, line;
+            std::stringstream ss;
+            if (readFile.is_open()) {
+                while (std::getline(readFile, line)) {
+                    ss << line;
+                }
+            }
         }
     }
     static void parseFile(string file) {
