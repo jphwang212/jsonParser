@@ -1,0 +1,4 @@
+.vscode
+jsonParser.dSYM
+*.cpp~
+*.un~
