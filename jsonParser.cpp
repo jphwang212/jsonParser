@@ -12,19 +12,9 @@ using namespace std;
 class jsonParser {
 public:
     static void parseLines(string file) {
-        // parse line by line
-        if (jsonParser::isJSON(file) == 0) {
-            std::unordered_map<string, string> stringMap;
-            std::locale::global(std::locale(""));
-            std::ifstream readFile(file);
-            string key, value, line;
-            std::stringstream ss;
-            if (readFile.is_open()) {
-                while (std::getline(readFile, line)) {
-                    ss << line;
-                }
-            }
-        }
+        // use char_iter and read until '}'
+        // case 1: letter is '{' or '[', then dealing with object or array
+        // case 2: letter is
     }
     static void parseFile(string file) {
         if (jsonParser::isJSON(file) == 0) {
@@ -32,60 +22,71 @@ public:
             std::unordered_map<string, string> stringMap;
             std::locale::global(std::locale(""));
             std::ifstream readFile(file);
-            string key, value;
+            string key, value, line;
+            int colonIdx;
             char colon;
             std::stringstream ss, val;
 
             for (buf_iter i(readFile), e; i != e; i++) {
                 char c = *i;
                 // logic for first opening curly brace
-                if ((ss.gcount() == 0 && c == '{') || c == '\n') {
+                if (ss.gcount() == 0 && c == '{') {
                     continue;
-                } else if (c == '}') {
+                } else if (c == '}' && *e == EOF) {
                     break;
-                } else if (c == ',') {
-                    bool boolVal;
-                    int intVal;
-                    // cout << "> ss = " << ss.str() << "\n";
-                    ss >> std::quoted(key) >> colon >> value;
-                    if (value.at(0) != '"') {
-                        cout << "The value is NOT a string.\n";
-                    }
-                    // have to simulate different types. c++ maps limited to values of 1 type
-                    // prints value and type
-                    if (ss.fail()) {
-                        cout << "Failed stream into quoted string\n";
-                        // try to put into int then bool
-                        if (ss >> intVal) {
-                            cout << "Streaming into int\n";
-                            value = std::to_string(intVal);
-                        } else if (ss >> value) {
-                            if (!value.compare("true") || !value.compare("false")) {
-                                // input boolean value
-                                value = "[Boolean type]: " + value;
-                            } else if (value.at(0) == '[') {
-                                value = "[Array type]: " + value;
-                            } else if (value.at(0) == '{') {
-                                value = "[Object type]: " + value;
-                            }
-                        }
-                    }
-                    cout << "Key = " << key << "\n";
-                    cout << "Value = " << value << "\n";
-                    stringMap.insert({key, value});
-                    ss.str("");
-                    key = "";
-                    value = "";
-                    // key = "";
-                    // value = "";
+                    // } else if (c == ',') {
+                    //     bool boolVal;
+                    //     int intVal;
+                    //     // cout << "> ss = " << ss.str() << "\n";
+                    //     ss >> std::quoted(key) >> colon >> value;
+                    //     if (value.at(0) != '"') {
+                    //         cout << "The value is NOT a string.\n";
+                    //     }
+                    //     // have to simulate different types. c++ maps limited to values of 1 type
+                    //     // prints value and type
+                    //     if (ss.fail()) {
+                    //         cout << "Failed stream into quoted string\n";
+                    //         // try to put into int then bool
+                    //         if (ss >> intVal) {
+                    //             cout << "Streaming into int\n";
+                    //             value = std::to_string(intVal);
+                    //         } else if (ss >> value) {
+                    //             if (!value.compare("true") || !value.compare("false")) {
+                    //                 // input boolean value
+                    //                 value = "[Boolean type]: " + value;
+                    //             } else if (value.at(0) == '[') {
+                    //                 value = "[Array type]: " + value;
+                    //             } else if (value.at(0) == '{') {
+                    //                 value = "[Object type]: " + value;
+                    //             }
+                    //         }
+                    //     }
+                    //     cout << "Key = " << key << "\n";
+                    //     cout << "Value = " << value << "\n";
+                    //     stringMap.insert({key, value});
+                    //     ss.str("");
+                    //     key = "";
+                    //     value = "";
+                    //     // key = "";
+                    //     // value = "";
                 } else {
                     ss << c;
                 }
             }
+            // stringstream holds content of json
+            while (std::getline(ss, line, ',')) {
+                colonIdx = line.find(':');
+                if (colonIdx < 0) {
+                    break;
+                }
+                key = line.substr(0, colonIdx - 1);
+                value = line.substr(colonIdx + 1, line.length() - 1);
+                stringMap.insert({key, value});
+            }
             // Print map
-            // for (const auto &pair : stringMap) {
-            //     cout << pair.first << ": " << pair.second << endl;
-            // }
+            for (const auto &pair : stringMap) {
+                cout << pair.first << ": " << pair.second << endl;
+            }
         }
     }
     // has matching sets of "{}"
