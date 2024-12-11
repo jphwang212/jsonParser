@@ -19,6 +19,7 @@ public:
             std::ifstream readFile(file);
             string key, value, line;
             int colonIdx;
+            int matchCount = 0;
             char colon;
             std::stringstream ss;
 
@@ -26,9 +27,13 @@ public:
                 char c = *i;
                 // logic for first opening curly brace
                 if (ss.gcount() == 0 && c == '{') {
+                    matchCount++;
                     continue;
                 } else if (c == '}') {
-                    break;
+                    matchCount--;
+                    if (matchCount == 0) {
+                        break;
+                    }
                 } else {
                     ss << c;
                 }
@@ -78,5 +83,6 @@ public:
 };
 int main() {
     jsonParser::parseFile("tests/step3/valid.json");
+    jsonParser::parseFile("tests/step4/valid2.json");
     return 0;
 }
